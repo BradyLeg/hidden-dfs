@@ -9,16 +9,16 @@ import java.util.Set;
 public class Traverse {
   public static void main(String[] args) {
     // Create Person objects with empty confidant sets.
-    Person alice   = new Person("Alice",   30, new HashSet<>());
-    Person bob     = new Person("Bob",     28, new HashSet<>());
+    Person alice = new Person("Alice", 30, new HashSet<>());
+    Person bob = new Person("Bob", 28, new HashSet<>());
     Person charlie = new Person("Charlie", 32, new HashSet<>());
-    Person diana   = new Person("Diana",   27, new HashSet<>());
-    Person eve     = new Person("Eve",     35, new HashSet<>());
-    Person frank   = new Person("Frank",   29, new HashSet<>());
-    Person grace   = new Person("Grace",   33, new HashSet<>());
-    Person henry   = new Person("Henry",   31, new HashSet<>());
-    Person irene   = new Person("Irene",   26, new HashSet<>());
-    Person jack    = new Person("Jack",    40, new HashSet<>());
+    Person diana = new Person("Diana", 27, new HashSet<>());
+    Person eve = new Person("Eve", 35, new HashSet<>());
+    Person frank = new Person("Frank", 29, new HashSet<>());
+    Person grace = new Person("Grace", 33, new HashSet<>());
+    Person henry = new Person("Henry", 31, new HashSet<>());
+    Person irene = new Person("Irene", 26, new HashSet<>());
+    Person jack = new Person("Jack", 40, new HashSet<>());
 
     // Set up confidant relationships.
     // Note: Relationships are directional and a person is not their own confidant.
@@ -29,10 +29,9 @@ public class Traverse {
     eve.getConfidants().addAll(Arrays.asList(frank, irene));
     frank.getConfidants().addAll(Arrays.asList(bob, grace));
     grace.getConfidants().add(henry);
-    henry.getConfidants().addAll(Arrays.asList(alice, diana));
-    irene.getConfidants().addAll(Arrays.asList(jack, diana));
-    jack.getConfidants().addAll(Arrays.asList(charlie, bob));
-
+    henry.getConfidants().addAll(Arrays.asList(irene));
+    irene.getConfidants().addAll(Arrays.asList(jack));
+    jack.getConfidants().addAll(Arrays.asList(henry));
 
     Map<Integer, Set<Integer>> graph = new HashMap<>();
     graph.put(3, new HashSet<>(Arrays.asList(7, 34)));
@@ -48,8 +47,8 @@ public class Traverse {
 
     // See below site for visualization of this graph
     // https://auberonedu.github.io/graph-explore/graph_site/viz.html
-    Vertex<Integer> v3  = new Vertex<>(3);
-    Vertex<Integer> v7  = new Vertex<>(7);
+    Vertex<Integer> v3 = new Vertex<>(3);
+    Vertex<Integer> v7 = new Vertex<>(7);
     Vertex<Integer> v12 = new Vertex<>(12);
     Vertex<Integer> v34 = new Vertex<>(34);
     Vertex<Integer> v56 = new Vertex<>(56);
@@ -59,15 +58,66 @@ public class Traverse {
     Vertex<Integer> v23 = new Vertex<>(23);
     Vertex<Integer> v67 = new Vertex<>(67);
 
-    v3.neighbors  = new ArrayList<>(List.of(v7, v34));
-    v7.neighbors  = new ArrayList<>(List.of(v12, v45, v34, v56));
+    v3.neighbors = new ArrayList<>(List.of(v7, v34));
+    v7.neighbors = new ArrayList<>(List.of(v12, v45, v34, v56));
     v12.neighbors = new ArrayList<>(List.of(v7, v56, v78));
-    v34.neighbors = new ArrayList<>(List.of(v34, v91)); 
+    v34.neighbors = new ArrayList<>(List.of(v34, v91));
     v56.neighbors = new ArrayList<>(List.of(v78));
     v78.neighbors = new ArrayList<>(List.of(v91));
     v91.neighbors = new ArrayList<>(List.of(v56));
     v45.neighbors = new ArrayList<>(List.of(v23));
     v23.neighbors = new ArrayList<>(List.of());
     v67.neighbors = new ArrayList<>(List.of(v91));
+
+    System.out.println();
+    // printGossipers(henry);
+    System.out.println(reachable(graph, 45, 3));
   }
+
+  public static boolean reachable(Map<Integer, Set<Integer>> graph, int start, int end) {
+    Set<Integer> visited = new HashSet<>();
+    return reachable(graph, start, end, visited);
+  }
+
+  public static boolean reachable(Map<Integer, Set<Integer>> graph, int start, int end, Set<Integer> visited) {
+    if (start == end) {
+      return true;
+    }
+
+    if (visited.contains(start) || graph == null ||
+        !graph.containsKey(start) || graph.get(start) == null) {
+      return false;
+    }
+
+    visited.add(start);
+
+    for (int neighbors : graph.get(start)) {
+      if (reachable(graph, neighbors, end, visited)) {
+        return true;
+      }
+    }
+
+    return false;
+
+  }
+
+  public static void printGossipers(Person person) {
+    Set<Person> visited = new HashSet<>();
+
+    printGossipers(person, visited);
+  }
+
+  public static void printGossipers(Person person, Set<Person> visited) {
+    if (person == null || visited.contains(person)) {
+      return;
+    }
+
+    visited.add(person);
+    System.out.println(person.getName());
+
+    for (Person confidant : person.getConfidants()) {
+      printGossipers(confidant, visited);
+    }
+  }
+
 }
